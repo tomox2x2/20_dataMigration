@@ -1,0 +1,32 @@
+Sort  (cost=1701.57..1702.48 rows=365 width=64) (actual time=9.999..10.002 rows=1 loops=1)
+  Sort Key: ma.account_type, (date_trunc('MONTH'::text, tj1.journal_date))
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=176
+  ->  HashAggregate  (cost=1680.56..1686.04 rows=365 width=64) (actual time=9.991..9.995 rows=1 loops=1)
+        Group Key: ma.account_type, date_trunc('MONTH'::text, tj1.journal_date), ma.account_code, ma.account_name
+        Batches: 1  Memory Usage: 37kB
+        Buffers: shared hit=176
+        ->  Nested Loop  (cost=482.66..1646.30 rows=1958 width=42) (actual time=2.608..8.831 rows=1901 loops=1)
+              Buffers: shared hit=176
+              ->  Seq Scan on m_account ma  (cost=0.00..1.46 rows=1 width=29) (actual time=0.008..0.014 rows=1 loops=1)
+                    Filter: (account_id = '1'::numeric)
+                    Rows Removed by Filter: 36
+                    Buffers: shared hit=1
+              ->  Hash Join  (cost=482.66..1620.36 rows=1958 width=23) (actual time=2.596..8.490 rows=1901 loops=1)
+                    Hash Cond: (tj2.journal_id = tj1.journal_id)
+                    Buffers: shared hit=175
+                    ->  Index Only Scan using idx_jd_cover_1 on t_journal_detail tj2  (cost=0.42..1075.29 rows=23937 width=21) (actual time=0.023..2.837 rows=22914 loops=1)
+                          Index Cond: (account_id = '1'::numeric)
+                          Heap Fetches: 0
+                          Buffers: shared hit=139
+                    ->  Hash  (cost=380.00..380.00 rows=8179 width=14) (actual time=2.555..2.556 rows=8563 loops=1)
+                          Buckets: 16384 (originally 8192)  Batches: 1 (originally 1)  Memory Usage: 520kB
+                          Buffers: shared hit=36
+                          ->  Index Only Scan using idx_jh_cover_1 on t_journal_header tj1  (cost=0.42..380.00 rows=8179 width=14) (actual time=0.017..0.993 rows=8563 loops=1)
+                                Index Cond: ((journal_date >= '2026-01-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-02-01 00:00:00'::timestamp without time zone))
+                                Heap Fetches: 0
+                                Buffers: shared hit=36
+Planning:
+  Buffers: shared hit=23
+Planning Time: 0.333 ms
+Execution Time: 10.059 ms

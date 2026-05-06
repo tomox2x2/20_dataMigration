@@ -1,0 +1,15 @@
+GroupAggregate  (cost=0.42..867144.98 rows=365 width=40) (actual time=1.697..532.261 rows=365 loops=1)
+  Group Key: tj1.journal_date
+  Buffers: shared hit=303283
+  ->  Index Only Scan using idx_jh_cover_1 on t_journal_header tj1  (cost=0.42..3140.42 rows=100000 width=14) (actual time=0.015..10.964 rows=100000 loops=1)
+        Heap Fetches: 0
+        Buffers: shared hit=387
+  SubPlan 1
+    ->  Aggregate  (cost=8.62..8.63 rows=1 width=8) (actual time=0.005..0.005 rows=1 loops=100000)
+          Buffers: shared hit=302896
+          ->  Index Only Scan using idx_jd_order_1 on t_journal_detail tj2  (cost=0.42..8.60 rows=10 width=0) (actual time=0.003..0.004 rows=9 loops=100000)
+                Index Cond: (journal_id = tj1.journal_id)
+                Heap Fetches: 0
+                Buffers: shared hit=302896
+Planning Time: 0.125 ms
+Execution Time: 532.343 ms
