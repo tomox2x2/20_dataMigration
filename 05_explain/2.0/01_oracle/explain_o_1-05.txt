@@ -1,0 +1,24 @@
+Plan hash value: 1488371438
+ 
+------------------------------------------------------------------------------------------------------------
+| Id  | Operation                       | Name             | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
+------------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                |                  | 84169 |  6904K|       |  3121   (1)| 00:00:01 |
+|   1 |  SORT GROUP BY                  |                  | 84169 |  6904K|  7936K|  3121   (1)| 00:00:01 |
+|*  2 |   HASH JOIN                     |                  | 84169 |  6904K|       |  1480   (1)| 00:00:01 |
+|   3 |    TABLE ACCESS FULL            | M_ACCOUNT        |    37 |  1073 |       |     3   (0)| 00:00:01 |
+|*  4 |    HASH JOIN                    |                  | 84169 |  4520K|       |  1477   (1)| 00:00:01 |
+|*  5 |     TABLE ACCESS FULL           | T_JOURNAL_HEADER |  9974 |   155K|       |   171   (1)| 00:00:01 |
+|   6 |     NESTED LOOPS                |                  |   850K|    31M|       |  1304   (1)| 00:00:01 |
+|   7 |      TABLE ACCESS BY INDEX ROWID| M_COMPANY        |     1 |    25 |       |     1   (0)| 00:00:01 |
+|*  8 |       INDEX UNIQUE SCAN         | SYS_C008326      |     1 |       |       |     0   (0)| 00:00:01 |
+|   9 |      TABLE ACCESS FULL          | T_JOURNAL_DETAIL |   850K|    11M|       |  1303   (1)| 00:00:01 |
+------------------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+ 
+   2 - access("TJ2"."ACCOUNT_ID"="MA"."ACCOUNT_ID")
+   4 - access("TJ1"."COMPANY_ID"="MC"."COMPANY_ID" AND "TJ1"."JOURNAL_ID"="TJ2"."JOURNAL_ID")
+   5 - filter("TJ1"."COMPANY_ID"=3)
+   8 - access("MC"."COMPANY_ID"=3)

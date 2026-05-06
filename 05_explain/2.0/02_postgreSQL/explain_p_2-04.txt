@@ -1,0 +1,8 @@
+Sort  (cost=31.07..32.18 rows=444 width=70) (actual time=0.453..0.468 rows=444 loops=1)
+  Sort Key: account_code, journal_date_m
+  Sort Method: quicksort  Memory: 56kB
+  Buffers: shared hit=6
+  ->  Seq Scan on t_settl_m_9999a00 t1  (cost=0.00..11.55 rows=444 width=70) (actual time=0.015..0.149 rows=444 loops=1)
+        Buffers: shared hit=6
+Planning Time: 0.053 ms
+Execution Time: 0.512 ms

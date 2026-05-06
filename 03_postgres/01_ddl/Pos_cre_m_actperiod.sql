@@ -1,0 +1,13 @@
+DROP TABLE act1.m_actperiod CASCADE;
+
+CREATE TABLE act1.m_actperiod(
+    fin_year CHARACTER(4) NOT NULL,
+    fin_class CHARACTER(1) NOT NULL,
+    fin_month CHARACTER(2) NOT NULL,
+    start_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+    end_date TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+    created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT (CLOCK_TIMESTAMP() AT TIME ZONE COALESCE(CURRENT_SETTING('aws_oracle_ext.tz', TRUE), 'UTC'))::TIMESTAMP(0)
+)
+        WITH (
+        OIDS=FALSE
+        );

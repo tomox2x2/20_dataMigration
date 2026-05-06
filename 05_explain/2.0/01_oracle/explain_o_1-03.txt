@@ -1,0 +1,41 @@
+Plan hash value: 919023877
+ 
+---------------------------------------------------------------------------------------------------------------------
+| Id  | Operation                                | Name             | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
+---------------------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                         |                  |  7335 |   924K|       |  1694   (1)| 00:00:01 |
+|   1 |  SORT ORDER BY                           |                  |  7335 |   924K|  1056K|  1694   (1)| 00:00:01 |
+|*  2 |   FILTER                                 |                  |       |       |       |            |          |
+|*  3 |    HASH JOIN                             |                  |  7335 |   924K|       |  1480   (1)| 00:00:01 |
+|   4 |     TABLE ACCESS FULL                    | M_ACCOUNT        |    37 |  1073 |       |     3   (0)| 00:00:01 |
+|*  5 |     HASH JOIN                            |                  |  7335 |   716K|       |  1477   (1)| 00:00:01 |
+|*  6 |      HASH JOIN                           |                  |   869 | 72127 |       |   172   (2)| 00:00:01 |
+|   7 |       NESTED LOOPS                       |                  |   100 |  5200 |       |     4   (0)| 00:00:01 |
+|   8 |        TABLE ACCESS BY INDEX ROWID       | M_COMPANY        |     1 |    25 |       |     1   (0)| 00:00:01 |
+|*  9 |         INDEX UNIQUE SCAN                | SYS_C008326      |     1 |       |       |     0   (0)| 00:00:01 |
+|  10 |        TABLE ACCESS FULL                 | M_PARTY          |   100 |  2700 |       |     3   (0)| 00:00:01 |
+|  11 |       TABLE ACCESS BY INDEX ROWID BATCHED| T_JOURNAL_HEADER |   869 | 26939 |       |   168   (2)| 00:00:01 |
+|  12 |        BITMAP CONVERSION TO ROWIDS       |                  |       |       |       |            |          |
+|  13 |         BITMAP AND                       |                  |       |       |       |            |          |
+|  14 |          BITMAP CONVERSION FROM ROWIDS   |                  |       |       |       |            |          |
+|* 15 |           INDEX RANGE SCAN               | IDX_JH_COMPANY   |       |       |       |    31   (0)| 00:00:01 |
+|  16 |          BITMAP CONVERSION FROM ROWIDS   |                  |       |       |       |            |          |
+|  17 |           SORT ORDER BY                  |                  |       |       |       |            |          |
+|* 18 |            INDEX RANGE SCAN              | IDX_JH_DATE      |       |       |       |    34   (0)| 00:00:01 |
+|  19 |      TABLE ACCESS FULL                   | T_JOURNAL_DETAIL |   850K|    13M|       |  1303   (1)| 00:00:01 |
+---------------------------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+ 
+   2 - filter(TO_DATE('2026-08-01')>TO_DATE('2026-07-01'))
+   3 - access("TJ2"."ACCOUNT_ID"="M3"."ACCOUNT_ID")
+   5 - access("TJ1"."JOURNAL_ID"="TJ2"."JOURNAL_ID")
+   6 - access("TJ1"."PARTY_ID"="M2"."PARTY_ID" AND "TJ1"."COMPANY_ID"="M1"."COMPANY_ID")
+   9 - access("M1"."COMPANY_ID"=5)
+  15 - access("TJ1"."COMPANY_ID"=5)
+  18 - access("TJ1"."JOURNAL_DATE">='2026-07-01' AND "TJ1"."JOURNAL_DATE"<'2026-08-01')
+ 
+Note
+-----
+   - this is an adaptive plan

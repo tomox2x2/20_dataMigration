@@ -1,0 +1,29 @@
+Plan hash value: 147801054
+ 
+---------------------------------------------------------------------------------------------------
+| Id  | Operation              | Name             | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
+---------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT       |                  |   843K|   103M|       | 27109   (1)| 00:00:02 |
+|   1 |  SORT ORDER BY         |                  |   843K|   103M|   113M| 27109   (1)| 00:00:02 |
+|*  2 |   HASH JOIN            |                  |   843K|   103M|       |  2865   (1)| 00:00:01 |
+|   3 |    TABLE ACCESS FULL   | M_PARTY          |   100 |  2700 |       |     3   (0)| 00:00:01 |
+|*  4 |    HASH JOIN           |                  |   843K|    82M|       |  2859   (1)| 00:00:01 |
+|   5 |     TABLE ACCESS FULL  | M_ACCOUNT        |    37 |  1073 |       |     3   (0)| 00:00:01 |
+|*  6 |     HASH JOIN          |                  |   843K|    58M|       |  2854   (1)| 00:00:01 |
+|   7 |      TABLE ACCESS FULL | M_COMPANY        |    10 |   250 |       |     3   (0)| 00:00:01 |
+|*  8 |      HASH JOIN         |                  |   843K|    38M|  4200K|  2849   (1)| 00:00:01 |
+|   9 |       TABLE ACCESS FULL| T_JOURNAL_HEADER |   100K|  3027K|       |   171   (1)| 00:00:01 |
+|  10 |       TABLE ACCESS FULL| T_JOURNAL_DETAIL |   850K|    13M|       |  1303   (1)| 00:00:01 |
+---------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+ 
+   2 - access("TJ1"."PARTY_ID"="M2"."PARTY_ID")
+   4 - access("TJ2"."ACCOUNT_ID"="M3"."ACCOUNT_ID")
+   6 - access("TJ1"."COMPANY_ID"="M1"."COMPANY_ID")
+   8 - access("TJ1"."JOURNAL_ID"="TJ2"."JOURNAL_ID")
+ 
+Note
+-----
+   - this is an adaptive plan

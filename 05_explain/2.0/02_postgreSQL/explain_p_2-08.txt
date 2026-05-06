@@ -1,0 +1,10 @@
+Sort  (cost=24.73..24.92 rows=74 width=83) (actual time=0.221..0.224 rows=74 loops=1)
+  Sort Key: (to_char(journal_date_y, 'yyyy'::text)), company_code, account_code
+  Sort Method: quicksort  Memory: 32kB
+  Buffers: shared hit=13
+  ->  Seq Scan on t_settl_y_comp_9999a00 t1  (cost=0.00..22.43 rows=74 width=83) (actual time=0.017..0.109 rows=74 loops=1)
+        Filter: (company_id = '10'::numeric)
+        Rows Removed by Filter: 666
+        Buffers: shared hit=13
+Planning Time: 0.072 ms
+Execution Time: 0.239 ms

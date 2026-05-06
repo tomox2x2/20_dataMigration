@@ -1,0 +1,19 @@
+Plan hash value: 1440792216
+ 
+-------------------------------------------------------------------------------------------------
+| Id  | Operation            | Name             | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT     |                  |   843K|    45M|       | 14143   (1)| 00:00:01 |
+|   1 |  SORT GROUP BY       |                  |   843K|    45M|    54M| 14143   (1)| 00:00:01 |
+|*  2 |   HASH JOIN          |                  |   843K|    45M|       |  2648   (1)| 00:00:01 |
+|   3 |    TABLE ACCESS FULL | M_ACCOUNT        |    37 |  1073 |       |     3   (0)| 00:00:01 |
+|*  4 |    HASH JOIN         |                  |   843K|    21M|  2448K|  2643   (1)| 00:00:01 |
+|   5 |     TABLE ACCESS FULL| T_JOURNAL_HEADER |   100K|  1269K|       |   171   (1)| 00:00:01 |
+|   6 |     TABLE ACCESS FULL| T_JOURNAL_DETAIL |   850K|    11M|       |  1303   (1)| 00:00:01 |
+-------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+ 
+   2 - access("TJ2"."ACCOUNT_ID"="MA"."ACCOUNT_ID")
+   4 - access("TJ1"."JOURNAL_ID"="TJ2"."JOURNAL_ID")

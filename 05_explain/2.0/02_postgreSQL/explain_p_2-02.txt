@@ -1,0 +1,13 @@
+Sort  (cost=32045.43..32261.04 rows=86246 width=113) (actual time=275.885..280.101 rows=86372 loops=1)
+  Sort Key: party_id, journal_date, journal_id, line_no
+  Sort Method: quicksort  Memory: 14528kB
+  Buffers: shared hit=10258
+  ->  Bitmap Heap Scan on t_journal_9999a00 t1  (cost=3920.83..24974.91 rows=86246 width=113) (actual time=6.573..39.425 rows=86372 loops=1)
+        Recheck Cond: (company_id = '2'::numeric)
+        Heap Blocks: exact=9444
+        Buffers: shared hit=10258
+        ->  Bitmap Index Scan on idx_jr_order_1_9999a00  (cost=0.00..3899.27 rows=86246 width=0) (actual time=5.588..5.589 rows=86372 loops=1)
+              Index Cond: (company_id = '2'::numeric)
+              Buffers: shared hit=814
+Planning Time: 0.105 ms
+Execution Time: 289.720 ms

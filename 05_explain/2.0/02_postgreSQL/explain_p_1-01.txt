@@ -1,0 +1,57 @@
+Gather Merge  (cost=1003.36..159513.75 rows=500492 width=140) (actual time=107.003..2300.453 rows=850836 loops=1)
+  Workers Planned: 1
+  Workers Launched: 1
+  Buffers: shared hit=512830
+  ->  Incremental Sort  (cost=3.35..102208.39 rows=500492 width=140) (actual time=23.766..1106.898 rows=425418 loops=2)
+        Sort Key: tj1.company_id, tj1.party_id, tj1.journal_date, tj1.journal_id, tj2.line_no
+        Presorted Key: tj1.company_id, tj1.party_id, tj1.journal_date, tj1.journal_id
+        Full-sort Groups: 11599  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB
+        Buffers: shared hit=512830
+        Worker 0:  Full-sort Groups: 11594  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB
+        ->  Nested Loop  (cost=2.41..88138.16 rows=500492 width=140) (actual time=23.288..716.093 rows=425418 loops=2)
+              Buffers: shared hit=512789
+              ->  Nested Loop  (cost=2.26..73309.66 rows=500492 width=99) (actual time=23.257..468.754 rows=425418 loops=2)
+                    Buffers: shared hit=512640
+                    ->  Nested Loop  (cost=1.84..9895.03 rows=58824 width=79) (actual time=23.179..114.551 rows=50000 loops=2)
+                          Buffers: shared hit=100903
+                          ->  Merge Join  (cost=1.68..8416.93 rows=58824 width=56) (actual time=23.136..90.734 rows=50000 loops=2)
+                                Merge Cond: (tj1.company_id = m1.company_id)
+                                Buffers: shared hit=100502
+                                ->  Parallel Index Scan using idx_jh_order_1 on t_journal_header tj1  (cost=0.42..7680.31 rows=58824 width=35) (actual time=0.050..53.174 rows=50000 loops=2)
+                                      Buffers: shared hit=100500
+                                ->  Sort  (cost=1.27..1.29 rows=10 width=26) (actual time=0.089..0.097 rows=10 loops=2)
+                                      Sort Key: m1.company_id
+                                      Sort Method: quicksort  Memory: 25kB
+                                      Buffers: shared hit=2
+                                      Worker 0:  Sort Method: quicksort  Memory: 25kB
+                                      ->  Seq Scan on m_company m1  (cost=0.00..1.10 rows=10 width=26) (actual time=0.056..0.058 rows=10 loops=2)
+                                            Buffers: shared hit=2
+                          ->  Memoize  (cost=0.15..0.17 rows=1 width=28) (actual time=0.000..0.000 rows=1 loops=100000)
+                                Cache Key: tj1.party_id
+                                Cache Mode: logical
+                                Hits: 49934  Misses: 100  Evictions: 0  Overflows: 0  Memory Usage: 13kB
+                                Buffers: shared hit=401
+                                Worker 0:  Hits: 49866  Misses: 100  Evictions: 0  Overflows: 0  Memory Usage: 13kB
+                                ->  Index Scan using m_party_pkey on m_party m2  (cost=0.14..0.16 rows=1 width=28) (actual time=0.003..0.003 rows=1 loops=200)
+                                      Index Cond: (party_id = tj1.party_id)
+                                      Buffers: shared hit=401
+                    ->  Index Scan using idx_jd_journal on t_journal_detail tj2  (cost=0.42..0.98 rows=10 width=26) (actual time=0.004..0.006 rows=9 loops=100000)
+                          Index Cond: (journal_id = tj1.journal_id)
+                          Buffers: shared hit=411737
+              ->  Memoize  (cost=0.15..0.17 rows=1 width=29) (actual time=0.000..0.000 rows=1 loops=850836)
+                    Cache Key: tj2.account_id
+                    Cache Mode: logical
+                    Hits: 425720  Misses: 37  Evictions: 0  Overflows: 0  Memory Usage: 5kB
+                    Buffers: shared hit=149
+                    Worker 0:  Hits: 425042  Misses: 37  Evictions: 0  Overflows: 0  Memory Usage: 5kB
+                    ->  Index Scan using m_account_pkey on m_account m3  (cost=0.14..0.16 rows=1 width=29) (actual time=0.002..0.002 rows=1 loops=74)
+                          Index Cond: (account_id = tj2.account_id)
+                          Buffers: shared hit=149
+Planning:
+  Buffers: shared hit=28
+Planning Time: 2.080 ms
+JIT:
+  Functions: 68
+  Options: Inlining false, Optimization false, Expressions true, Deforming true
+  Timing: Generation 3.374 ms, Inlining 0.000 ms, Optimization 2.016 ms, Emission 43.983 ms, Total 49.373 ms
+Execution Time: 2350.731 ms

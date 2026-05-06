@@ -1,0 +1,51 @@
+Gather Merge  (cost=17951.94..26284.85 rows=71420 width=140) (actual time=197.579..238.555 rows=86372 loops=1)
+  Workers Planned: 2
+  Workers Launched: 2
+  Buffers: shared hit=10406
+  ->  Sort  (cost=16951.91..17041.19 rows=35710 width=140) (actual time=154.607..156.396 rows=28791 loops=3)
+        Sort Key: tj1.party_id, tj1.journal_date, tj1.journal_id, tj2.line_no
+        Sort Method: quicksort  Memory: 6703kB
+        Buffers: shared hit=10406
+        Worker 0:  Sort Method: quicksort  Memory: 4220kB
+        Worker 1:  Sort Method: quicksort  Memory: 4344kB
+        ->  Hash Join  (cost=1624.81..14251.52 rows=35710 width=140) (actual time=11.748..78.544 rows=28791 loops=3)
+              Hash Cond: (tj2.account_id = m3.account_id)
+              Buffers: shared hit=10378
+              ->  Hash Join  (cost=1622.98..13966.66 rows=35710 width=99) (actual time=11.554..67.104 rows=28791 loops=3)
+                    Hash Cond: (tj2.journal_id = tj1.journal_id)
+                    Buffers: shared hit=10279
+                    ->  Parallel Seq Scan on t_journal_detail tj2  (cost=0.00..10657.15 rows=354515 width=26) (actual time=0.008..16.810 rows=283612 loops=3)
+                          Buffers: shared hit=7112
+                    ->  Hash  (cost=1497.07..1497.07 rows=10073 width=79) (actual time=11.434..11.438 rows=10169 loops=3)
+                          Buckets: 16384  Batches: 1  Memory Usage: 1225kB
+                          Buffers: shared hit=3167
+                          ->  Hash Join  (cost=197.73..1497.07 rows=10073 width=79) (actual time=0.937..7.957 rows=10169 loops=3)
+                                Hash Cond: (tj1.party_id = m2.party_id)
+                                Buffers: shared hit=3167
+                                ->  Nested Loop  (cost=194.48..1466.25 rows=10073 width=56) (actual time=0.845..5.662 rows=10169 loops=3)
+                                      Buffers: shared hit=3164
+                                      ->  Seq Scan on m_company m1  (cost=0.00..1.12 rows=1 width=26) (actual time=0.006..0.010 rows=1 loops=3)
+                                            Filter: (company_id = '2'::numeric)
+                                            Rows Removed by Filter: 9
+                                            Buffers: shared hit=3
+                                      ->  Bitmap Heap Scan on t_journal_header tj1  (cost=194.48..1364.40 rows=10073 width=35) (actual time=0.834..4.492 rows=10169 loops=3)
+                                            Recheck Cond: (company_id = '2'::numeric)
+                                            Heap Blocks: exact=1022
+                                            Buffers: shared hit=3161
+                                            ->  Bitmap Index Scan on idx_jh_company  (cost=0.00..191.97 rows=10073 width=0) (actual time=0.732..0.732 rows=10169 loops=3)
+                                                  Index Cond: (company_id = '2'::numeric)
+                                                  Buffers: shared hit=95
+                                ->  Hash  (cost=2.00..2.00 rows=100 width=28) (actual time=0.056..0.057 rows=100 loops=3)
+                                      Buckets: 1024  Batches: 1  Memory Usage: 14kB
+                                      Buffers: shared hit=3
+                                      ->  Seq Scan on m_party m2  (cost=0.00..2.00 rows=100 width=28) (actual time=0.027..0.036 rows=100 loops=3)
+                                            Buffers: shared hit=3
+              ->  Hash  (cost=1.37..1.37 rows=37 width=29) (actual time=0.042..0.043 rows=37 loops=3)
+                    Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                    Buffers: shared hit=3
+                    ->  Seq Scan on m_account m3  (cost=0.00..1.37 rows=37 width=29) (actual time=0.025..0.029 rows=37 loops=3)
+                          Buffers: shared hit=3
+Planning:
+  Buffers: shared hit=24
+Planning Time: 0.652 ms
+Execution Time: 242.945 ms

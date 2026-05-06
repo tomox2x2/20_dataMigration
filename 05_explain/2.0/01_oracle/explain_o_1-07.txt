@@ -1,0 +1,31 @@
+Plan hash value: 415594231
+ 
+------------------------------------------------------------------------------------------------------
+| Id  | Operation                         | Name             | Rows  | Bytes | Cost (%CPU)| Time     |
+------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                  |                  |  3423 |   223K|  1652   (1)| 00:00:01 |
+|   1 |  SORT GROUP BY                    |                  |  3423 |   223K|  1652   (1)| 00:00:01 |
+|*  2 |   HASH JOIN                       |                  |  4219 |   276K|  1651   (1)| 00:00:01 |
+|   3 |    TABLE ACCESS FULL              | M_ACCOUNT        |    37 |  1073 |     3   (0)| 00:00:01 |
+|*  4 |    HASH JOIN                      |                  |  4219 |   156K|  1648   (1)| 00:00:01 |
+|   5 |     VIEW                          | VW_GBF_10        |   500 | 12000 |   343   (1)| 00:00:01 |
+|   6 |      HASH GROUP BY                |                  |   500 | 18500 |   343   (1)| 00:00:01 |
+|   7 |       NESTED LOOPS                |                  |   500 | 18500 |   342   (0)| 00:00:01 |
+|   8 |        NESTED LOOPS               |                  |   900 | 18500 |   342   (0)| 00:00:01 |
+|   9 |         VIEW                      |                  |     2 |    48 |     4   (0)| 00:00:01 |
+|  10 |          HASH UNIQUE              |                  |     2 |       |     4   (0)| 00:00:01 |
+|  11 |           UNION-ALL               |                  |       |       |            |          |
+|  12 |            FAST DUAL              |                  |     1 |       |     2   (0)| 00:00:01 |
+|  13 |            FAST DUAL              |                  |     1 |       |     2   (0)| 00:00:01 |
+|* 14 |         INDEX RANGE SCAN          | IDX_JH_DATE      |   450 |       |     2   (0)| 00:00:01 |
+|  15 |        TABLE ACCESS BY INDEX ROWID| T_JOURNAL_HEADER |   250 |  3250 |   169   (0)| 00:00:01 |
+|  16 |     TABLE ACCESS FULL             | T_JOURNAL_DETAIL |   850K|    11M|  1303   (1)| 00:00:01 |
+------------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+ 
+   2 - access("TJ2"."ACCOUNT_ID"="MA"."ACCOUNT_ID")
+   4 - access("ITEM_1"="TJ2"."JOURNAL_ID")
+  14 - access("TJ1"."JOURNAL_DATE">="DATE1"."FROMDATE" AND 
+              "TJ1"."JOURNAL_DATE"<"DATE1"."TODATE")

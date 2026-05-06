@@ -1,0 +1,40 @@
+Sort  (cost=27522.48..27556.24 rows=13505 width=88) (actual time=484.908..490.671 rows=444 loops=1)
+  Sort Key: ma.account_code, (to_char(tj1.journal_date, 'yyyymm'::text))
+  Sort Method: quicksort  Memory: 53kB
+  Buffers: shared hit=8189
+  ->  Finalize HashAggregate  (cost=26393.38..26595.95 rows=13505 width=88) (actual time=484.316..490.220 rows=444 loops=1)
+        Group Key: ma.account_code, (to_char(tj1.journal_date, 'yyyymm'::text)), ma.account_type, ma.account_name
+        Batches: 1  Memory Usage: 657kB
+        Buffers: shared hit=8189
+        ->  Gather  (cost=23084.65..25988.23 rows=27010 width=88) (actual time=482.746..489.183 rows=1332 loops=1)
+              Workers Planned: 2
+              Workers Launched: 2
+              Buffers: shared hit=8189
+              ->  Partial HashAggregate  (cost=22084.65..22287.23 rows=13505 width=88) (actual time=452.741..452.906 rows=444 loops=3)
+                    Group Key: ma.account_code, to_char(tj1.journal_date, 'yyyymm'::text), ma.account_type, ma.account_name
+                    Batches: 1  Memory Usage: 657kB
+                    Buffers: shared hit=8189
+                    Worker 0:  Batches: 1  Memory Usage: 657kB
+                    Worker 1:  Batches: 1  Memory Usage: 657kB
+                    ->  Hash Join  (cost=2369.37..15880.64 rows=354515 width=66) (actual time=23.591..286.149 rows=283612 loops=3)
+                          Hash Cond: (tj2.account_id = ma.account_id)
+                          Buffers: shared hit=8189
+                          ->  Parallel Hash Join  (cost=2367.54..13955.33 rows=354515 width=23) (actual time=16.606..136.471 rows=283612 loops=3)
+                                Hash Cond: (tj2.journal_id = tj1.journal_id)
+                                Buffers: shared hit=8156
+                                ->  Parallel Seq Scan on t_journal_detail tj2  (cost=0.00..10657.15 rows=354515 width=21) (actual time=0.022..24.244 rows=283612 loops=3)
+                                      Buffers: shared hit=7112
+                                ->  Parallel Hash  (cost=1632.24..1632.24 rows=58824 width=14) (actual time=15.554..15.554 rows=33333 loops=3)
+                                      Buckets: 131072  Batches: 1  Memory Usage: 5760kB
+                                      Buffers: shared hit=1044
+                                      ->  Parallel Seq Scan on t_journal_header tj1  (cost=0.00..1632.24 rows=58824 width=14) (actual time=0.038..4.512 rows=33333 loops=3)
+                                            Buffers: shared hit=1044
+                          ->  Hash  (cost=1.37..1.37 rows=37 width=29) (actual time=0.059..0.059 rows=37 loops=3)
+                                Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                Buffers: shared hit=3
+                                ->  Seq Scan on m_account ma  (cost=0.00..1.37 rows=37 width=29) (actual time=0.027..0.031 rows=37 loops=3)
+                                      Buffers: shared hit=3
+Planning:
+  Buffers: shared hit=22
+Planning Time: 0.855 ms
+Execution Time: 491.569 ms

@@ -1,0 +1,61 @@
+Nested Loop  (cost=2314.11..7362.03 rows=7121 width=140) (actual time=39.323..65.271 rows=7068 loops=1)
+  Buffers: shared hit=4577
+  ->  Gather Merge  (cost=2314.11..7236.28 rows=7121 width=97) (actual time=39.288..61.956 rows=7068 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=4576
+        ->  Incremental Sort  (cost=1314.10..5435.16 rows=4189 width=97) (actual time=4.191..15.111 rows=3534 loops=2)
+              Sort Key: tj1.party_id, tj1.journal_date, tj1.journal_id, tj2.line_no
+              Presorted Key: tj1.party_id
+              Full-sort Groups: 94  Sort Method: quicksort  Average Memory: 33kB  Peak Memory: 33kB
+              Pre-sorted Groups: 61  Sort Method: quicksort  Average Memory: 35kB  Peak Memory: 35kB
+              Buffers: shared hit=4576
+              Worker 0:  Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+              ->  Nested Loop  (cost=1273.02..5267.93 rows=4189 width=97) (actual time=3.862..9.373 rows=3534 loops=2)
+                    Buffers: shared hit=4541
+                    ->  Nested Loop  (cost=1272.87..5158.85 rows=4189 width=78) (actual time=3.858..7.986 rows=3534 loops=2)
+                          Buffers: shared hit=4467
+                          ->  Merge Join  (cost=1272.45..1280.33 rows=492 width=58) (actual time=3.847..4.027 rows=416 loops=2)
+                                Merge Cond: (tj1.party_id = m2.party_id)
+                                Buffers: shared hit=1032
+                                ->  Sort  (cost=1267.12..1268.35 rows=492 width=35) (actual time=3.803..3.863 rows=416 loops=2)
+                                      Sort Key: tj1.party_id
+                                      Sort Method: quicksort  Memory: 77kB
+                                      Buffers: shared hit=1031
+                                      Worker 0:  Sort Method: quicksort  Memory: 25kB
+                                      ->  Parallel Bitmap Heap Scan on t_journal_header tj1  (cost=115.59..1245.13 rows=492 width=35) (actual time=1.025..3.603 rows=416 loops=2)
+                                            Recheck Cond: ((journal_date >= '2026-07-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-08-01 00:00:00'::timestamp without time zone))
+                                            Filter: (company_id = '2'::numeric)
+                                            Rows Removed by Filter: 3796
+                                            Heap Blocks: exact=1022
+                                            Buffers: shared hit=1031
+                                            ->  Bitmap Index Scan on idx_jh_date  (cost=0.00..115.38 rows=8309 width=0) (actual time=1.755..1.755 rows=8425 loops=1)
+                                                  Index Cond: ((journal_date >= '2026-07-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-08-01 00:00:00'::timestamp without time zone))
+                                                  Buffers: shared hit=9
+                                ->  Sort  (cost=5.32..5.57 rows=100 width=28) (actual time=0.065..0.072 rows=100 loops=1)
+                                      Sort Key: m2.party_id
+                                      Sort Method: quicksort  Memory: 30kB
+                                      Buffers: shared hit=1
+                                      ->  Seq Scan on m_party m2  (cost=0.00..2.00 rows=100 width=28) (actual time=0.010..0.018 rows=100 loops=1)
+                                            Buffers: shared hit=1
+                          ->  Index Scan using idx_jd_journal on t_journal_detail tj2  (cost=0.42..7.78 rows=10 width=26) (actual time=0.007..0.008 rows=8 loops=833)
+                                Index Cond: (journal_id = tj1.journal_id)
+                                Buffers: shared hit=3435
+                    ->  Memoize  (cost=0.15..0.17 rows=1 width=29) (actual time=0.000..0.000 rows=1 loops=7068)
+                          Cache Key: tj2.account_id
+                          Cache Mode: logical
+                          Hits: 7031  Misses: 37  Evictions: 0  Overflows: 0  Memory Usage: 5kB
+                          Buffers: shared hit=74
+                          ->  Index Scan using m_account_pkey on m_account m3  (cost=0.14..0.16 rows=1 width=29) (actual time=0.001..0.001 rows=1 loops=37)
+                                Index Cond: (account_id = tj2.account_id)
+                                Buffers: shared hit=74
+  ->  Materialize  (cost=0.00..1.13 rows=1 width=26) (actual time=0.000..0.000 rows=1 loops=7068)
+        Buffers: shared hit=1
+        ->  Seq Scan on m_company m1  (cost=0.00..1.12 rows=1 width=26) (actual time=0.021..0.023 rows=1 loops=1)
+              Filter: (company_id = '2'::numeric)
+              Rows Removed by Filter: 9
+              Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=24
+Planning Time: 1.185 ms
+Execution Time: 65.756 ms

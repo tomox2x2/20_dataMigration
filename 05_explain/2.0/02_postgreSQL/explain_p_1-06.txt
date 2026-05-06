@@ -1,0 +1,43 @@
+GroupAggregate  (cost=7317.44..7597.20 rows=6994 width=109) (actual time=30.409..34.917 rows=37 loops=1)
+  Group Key: (to_char(tj1.journal_date, 'yyyymm'::text)), mc.company_code, ma.account_code, mc.company_name, ma.account_type, ma.account_name
+  Buffers: shared hit=4618
+  ->  Sort  (cost=7317.44..7334.93 rows=6994 width=87) (actual time=30.305..31.401 rows=7392 loops=1)
+        Sort Key: (to_char(tj1.journal_date, 'yyyymm'::text)), mc.company_code, ma.account_code, mc.company_name, ma.account_type, ma.account_name
+        Sort Method: quicksort  Memory: 885kB
+        Buffers: shared hit=4618
+        ->  Nested Loop  (cost=1117.45..6870.81 rows=6994 width=87) (actual time=2.598..22.988 rows=7392 loops=1)
+              Buffers: shared hit=4618
+              ->  Seq Scan on m_company mc  (cost=0.00..1.12 rows=1 width=26) (actual time=0.005..0.014 rows=1 loops=1)
+                    Filter: (company_id = '3'::numeric)
+                    Rows Removed by Filter: 9
+                    Buffers: shared hit=1
+              ->  Gather  (cost=1117.45..6782.26 rows=6994 width=47) (actual time=2.585..20.528 rows=7392 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=4617
+                    ->  Hash Join  (cost=117.45..5082.86 rows=4114 width=47) (actual time=1.053..6.557 rows=3696 loops=2)
+                          Hash Cond: (tj2.account_id = ma.account_id)
+                          Buffers: shared hit=4617
+                          ->  Nested Loop  (cost=115.61..5068.99 rows=4114 width=28) (actual time=0.972..5.559 rows=3696 loops=2)
+                                Buffers: shared hit=4567
+                                ->  Parallel Bitmap Heap Scan on t_journal_header tj1  (cost=115.19..1244.31 rows=484 width=19) (actual time=0.957..2.584 rows=429 loops=2)
+                                      Recheck Cond: ((journal_date >= '2026-01-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-02-01 00:00:00'::timestamp without time zone))
+                                      Filter: (company_id = '3'::numeric)
+                                      Rows Removed by Filter: 3852
+                                      Heap Blocks: exact=1021
+                                      Buffers: shared hit=1030
+                                      ->  Bitmap Index Scan on idx_jh_date  (cost=0.00..114.98 rows=8269 width=0) (actual time=1.790..1.790 rows=8563 loops=1)
+                                            Index Cond: ((journal_date >= '2026-01-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-02-01 00:00:00'::timestamp without time zone))
+                                            Buffers: shared hit=9
+                                ->  Index Scan using idx_jd_journal on t_journal_detail tj2  (cost=0.42..7.80 rows=10 width=21) (actual time=0.004..0.006 rows=9 loops=858)
+                                      Index Cond: (journal_id = tj1.journal_id)
+                                      Buffers: shared hit=3537
+                          ->  Hash  (cost=1.37..1.37 rows=37 width=29) (actual time=0.031..0.031 rows=37 loops=2)
+                                Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                                Buffers: shared hit=2
+                                ->  Seq Scan on m_account ma  (cost=0.00..1.37 rows=37 width=29) (actual time=0.015..0.018 rows=37 loops=2)
+                                      Buffers: shared hit=2
+Planning:
+  Buffers: shared hit=27
+Planning Time: 0.429 ms
+Execution Time: 34.972 ms

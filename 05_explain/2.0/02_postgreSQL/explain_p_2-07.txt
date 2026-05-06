@@ -1,0 +1,8 @@
+Sort  (cost=4.22..4.41 rows=74 width=62) (actual time=0.186..0.192 rows=74 loops=1)
+  Sort Key: (to_char(journal_date_y, 'yyyy'::text)), account_code
+  Sort Method: quicksort  Memory: 29kB
+  Buffers: shared hit=1
+  ->  Seq Scan on t_settl_y_9999a00 t1  (cost=0.00..1.93 rows=74 width=62) (actual time=0.021..0.060 rows=74 loops=1)
+        Buffers: shared hit=1
+Planning Time: 0.070 ms
+Execution Time: 0.215 ms

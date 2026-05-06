@@ -1,0 +1,31 @@
+Plan hash value: 3181733170
+ 
+-------------------------------------------------------------------------------------------------------------
+| Id  | Operation                        | Name             | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                 |                  | 85814 |    10M|       |  3950   (1)| 00:00:01 |
+|   1 |  SORT ORDER BY                   |                  | 85814 |    10M|    11M|  3950   (1)| 00:00:01 |
+|*  2 |   HASH JOIN                      |                  | 85814 |    10M|       |  1483   (1)| 00:00:01 |
+|   3 |    TABLE ACCESS FULL             | M_ACCOUNT        |    37 |  1073 |       |     3   (0)| 00:00:01 |
+|*  4 |    HASH JOIN                     |                  | 85814 |  8380K|       |  1480   (1)| 00:00:01 |
+|*  5 |     HASH JOIN                    |                  | 10169 |   824K|       |   175   (1)| 00:00:01 |
+|   6 |      NESTED LOOPS                |                  |   100 |  5200 |       |     4   (0)| 00:00:01 |
+|   7 |       TABLE ACCESS BY INDEX ROWID| M_COMPANY        |     1 |    25 |       |     1   (0)| 00:00:01 |
+|*  8 |        INDEX UNIQUE SCAN         | SYS_C008326      |     1 |       |       |     0   (0)| 00:00:01 |
+|   9 |       TABLE ACCESS FULL          | M_PARTY          |   100 |  2700 |       |     3   (0)| 00:00:01 |
+|* 10 |      TABLE ACCESS FULL           | T_JOURNAL_HEADER | 10169 |   307K|       |   171   (1)| 00:00:01 |
+|  11 |     TABLE ACCESS FULL            | T_JOURNAL_DETAIL |   850K|    13M|       |  1303   (1)| 00:00:01 |
+-------------------------------------------------------------------------------------------------------------
+ 
+Predicate Information (identified by operation id):
+---------------------------------------------------
+ 
+   2 - access("TJ2"."ACCOUNT_ID"="M3"."ACCOUNT_ID")
+   4 - access("TJ1"."JOURNAL_ID"="TJ2"."JOURNAL_ID")
+   5 - access("TJ1"."PARTY_ID"="M2"."PARTY_ID" AND "TJ1"."COMPANY_ID"="M1"."COMPANY_ID")
+   8 - access("M1"."COMPANY_ID"=2)
+  10 - filter("TJ1"."COMPANY_ID"=2)
+ 
+Note
+-----
+   - this is an adaptive plan

@@ -1,0 +1,13 @@
+Sort  (cost=19524.08..19542.76 rows=7473 width=113) (actual time=26.797..27.093 rows=7068 loops=1)
+  Sort Key: party_id, journal_date, journal_id, line_no
+  Sort Method: quicksort  Memory: 1191kB
+  Buffers: shared hit=1796
+  ->  Bitmap Heap Scan on t_journal_9999a00 t1  (cost=4332.37..19043.28 rows=7473 width=113) (actual time=6.797..9.665 rows=7068 loops=1)
+        Recheck Cond: ((company_id = '2'::numeric) AND (journal_date >= '2026-07-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-08-01 00:00:00'::timestamp without time zone))
+        Heap Blocks: exact=982
+        Buffers: shared hit=1796
+        ->  Bitmap Index Scan on idx_jr_order_1_9999a00  (cost=0.00..4330.50 rows=7473 width=0) (actual time=6.704..6.704 rows=7068 loops=1)
+              Index Cond: ((company_id = '2'::numeric) AND (journal_date >= '2026-07-01 00:00:00'::timestamp without time zone) AND (journal_date < '2026-08-01 00:00:00'::timestamp without time zone))
+              Buffers: shared hit=814
+Planning Time: 0.163 ms
+Execution Time: 27.834 ms

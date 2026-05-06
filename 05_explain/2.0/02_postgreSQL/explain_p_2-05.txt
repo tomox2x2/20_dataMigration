@@ -1,0 +1,13 @@
+Sort  (cost=116.91..118.02 rows=444 width=91) (actual time=0.349..0.364 rows=444 loops=1)
+  Sort Key: journal_date_m, company_code, account_code
+  Sort Method: quicksort  Memory: 70kB
+  Buffers: shared hit=13
+  ->  Bitmap Heap Scan on t_settl_m_comp_9999a00 t1  (cost=15.72..97.38 rows=444 width=91) (actual time=0.061..0.202 rows=444 loops=1)
+        Recheck Cond: (company_id = '3'::numeric)
+        Heap Blocks: exact=9
+        Buffers: shared hit=13
+        ->  Bitmap Index Scan on idx_smc_order_1_9999a00  (cost=0.00..15.61 rows=444 width=0) (actual time=0.050..0.050 rows=444 loops=1)
+              Index Cond: (company_id = '3'::numeric)
+              Buffers: shared hit=4
+Planning Time: 0.077 ms
+Execution Time: 0.412 ms

@@ -1,0 +1,10 @@
+Incremental Sort  (cost=5.74..60.96 rows=37 width=91) (actual time=0.065..0.066 rows=37 loops=1)
+  Sort Key: journal_date_m, company_code, account_code
+  Presorted Key: journal_date_m
+  Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 28kB  Peak Memory: 28kB
+  Buffers: shared hit=4
+  ->  Index Scan using idx_smc_order_1_9999a00 on t_settl_m_comp_9999a00 t1  (cost=0.28..59.96 rows=37 width=91) (actual time=0.026..0.041 rows=37 loops=1)
+        Index Cond: ((company_id = '3'::numeric) AND (journal_date_m >= '2026-01-01 00:00:00'::timestamp without time zone) AND (journal_date_m < '2026-02-01 00:00:00'::timestamp without time zone))
+        Buffers: shared hit=4
+Planning Time: 0.089 ms
+Execution Time: 0.085 ms

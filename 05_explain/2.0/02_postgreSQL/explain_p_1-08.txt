@@ -1,0 +1,46 @@
+Sort  (cost=10117.06..10117.25 rows=74 width=109) (actual time=136.298..136.307 rows=74 loops=1)
+  Sort Key: ('2025'::text), mc.company_code, ma.account_code
+  Sort Method: quicksort  Memory: 32kB
+  Buffers: shared hit=41010
+  ->  HashAggregate  (cost=10113.84..10114.77 rows=74 width=109) (actual time=136.193..136.220 rows=74 loops=1)
+        Group Key: ('2025'::text), mc.company_code, ma.account_code, mc.company_name, ma.account_type, ma.account_name
+        Batches: 1  Memory Usage: 88kB
+        Buffers: shared hit=41010
+        ->  Hash Join  (cost=2.72..9694.60 rows=18633 width=87) (actual time=0.065..86.199 rows=84514 loops=1)
+              Hash Cond: (tj2.account_id = ma.account_id)
+              Buffers: shared hit=41010
+              ->  Nested Loop  (cost=0.88..9638.25 rows=18633 width=68) (actual time=0.050..67.101 rows=84514 loops=1)
+                    Buffers: shared hit=41009
+                    ->  Nested Loop  (cost=0.46..851.08 rows=2190 width=59) (actual time=0.040..6.101 rows=9938 loops=1)
+                          Buffers: shared hit=128
+                          ->  Nested Loop  (cost=0.46..822.57 rows=2190 width=43) (actual time=0.029..3.569 rows=9938 loops=1)
+                                Buffers: shared hit=127
+                                ->  Unique  (cost=0.04..0.06 rows=2 width=44) (actual time=0.010..0.018 rows=2 loops=1)
+                                      ->  Sort  (cost=0.04..0.05 rows=2 width=44) (actual time=0.010..0.015 rows=2 loops=1)
+                                            Sort Key: ('2025'::text), ('2025-04-01'::date), ('2026-03-31 00:00:00'::timestamp without time zone)
+                                            Sort Method: quicksort  Memory: 25kB
+                                            ->  Append  (cost=0.00..0.03 rows=2 width=44) (actual time=0.002..0.004 rows=2 loops=1)
+                                                  ->  Result  (cost=0.00..0.01 rows=1 width=44) (actual time=0.001..0.002 rows=1 loops=1)
+                                                  ->  Result  (cost=0.00..0.01 rows=1 width=44) (actual time=0.000..0.000 rows=1 loops=1)
+                                ->  Index Only Scan using idx_jh_order_1 on t_journal_header tj1  (cost=0.42..400.31 rows=1095 width=19) (actual time=0.015..1.350 rows=4969 loops=2)
+                                      Index Cond: ((company_id = '10'::numeric) AND (journal_date >= ('2025-04-01'::date)) AND (journal_date <= ('2026-03-31 00:00:00'::timestamp without time zone)))
+                                      Heap Fetches: 0
+                                      Buffers: shared hit=127
+                          ->  Materialize  (cost=0.00..1.13 rows=1 width=26) (actual time=0.000..0.000 rows=1 loops=9938)
+                                Buffers: shared hit=1
+                                ->  Seq Scan on m_company mc  (cost=0.00..1.12 rows=1 width=26) (actual time=0.008..0.008 rows=1 loops=1)
+                                      Filter: (company_id = '10'::numeric)
+                                      Rows Removed by Filter: 9
+                                      Buffers: shared hit=1
+                    ->  Index Scan using idx_jd_journal on t_journal_detail tj2  (cost=0.42..3.91 rows=10 width=21) (actual time=0.004..0.005 rows=9 loops=9938)
+                          Index Cond: (journal_id = tj1.journal_id)
+                          Buffers: shared hit=40881
+              ->  Hash  (cost=1.37..1.37 rows=37 width=29) (actual time=0.011..0.012 rows=37 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                    Buffers: shared hit=1
+                    ->  Seq Scan on m_account ma  (cost=0.00..1.37 rows=37 width=29) (actual time=0.002..0.005 rows=37 loops=1)
+                          Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=24
+Planning Time: 0.845 ms
+Execution Time: 136.372 ms

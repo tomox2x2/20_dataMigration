@@ -1,0 +1,8 @@
+Index Scan using idx_jr_order_1_9999a00 on t_journal_9999a00 t1  (cost=0.42..124441.06 rows=850836 width=113) (actual time=3.883..336.489 rows=850836 loops=1)
+  Buffers: shared hit=129309
+Planning Time: 0.078 ms
+JIT:
+  Functions: 2
+  Options: Inlining false, Optimization false, Expressions true, Deforming true
+  Timing: Generation 0.293 ms, Inlining 0.000 ms, Optimization 0.221 ms, Emission 3.639 ms, Total 4.153 ms
+Execution Time: 378.186 ms
