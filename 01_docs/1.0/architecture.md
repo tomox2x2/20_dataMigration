@@ -36,18 +36,17 @@
 
 ### ■ As-Is
 [Client]
-→ 
+↓
 [Oracle XE (Docker)]
-→ 
+↓
 [Local Environment]
 
 ### ■ To-Be
 [Client]
-→ 
+↓
 [psql]
-→ 
 [VPC / Security Group]
-→ 
+↓
 [PostgreSQL (AWS RDS)]
 
 ---
