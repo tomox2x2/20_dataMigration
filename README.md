@@ -1,178 +1,289 @@
-# Oracle → PostgreSQL 移行 PoC（性能改善検証）
+# Oracle → PostgreSQL Migration PoC
 
-## ■ 概要
-Oracle Database から PostgreSQL への移行および、既存SQLのパフォーマンス改善を目的としたPoC（概念実証）です。  
-会計系データ（仕訳・勘定科目）を対象に、スキーマ変換・データ移行・SQLチューニングを実施しました。
+Oracle Database を PostgreSQL へ移行することを想定し、
+スキーマ・SQL・ストアドプロシージャの移植、および性能比較・実行計画比較を実施した
+Proof of Concept（PoC）です。
 
----
-
-## ■ 背景
-- Oracle ライセンスコスト削減（OSS化）
-- クラウド移行（AWS RDS想定）
-- PostgreSQL におけるパフォーマンスチューニング技術の習得
+会計システムを想定したデータモデルを利用し、
+Oracle と PostgreSQL の実装差異や性能特性について検証を行いました。
 
 ---
 
-## ■ 成果（ハイライト）
+## Highlights
 
-- 最大 **70%の性能改善** を達成
-- 約 **100万件のデータ移行** を実施
-- クエリ改善：**7本**
-
-| クエリ | Before | After | 改善率 |
-|--------|--------|--------|--------|
-| 集約クエリ | 0.225秒 | 0.069秒 | 70% |
-| JOINクエリ | 0.082秒 | 0.068秒 | 17% |
-| サブクエリ | 0.674秒 | 0.556秒 | 17% |
+- Oracle → PostgreSQL 移植（テーブル・SQL・PL/SQL）
+- 約100万件のデータを用いた性能・実行計画比較
+- AWS RDS構築、事前集約テーブルの有効性検証まで実施
 
 ---
 
-## ■ 技術スタック
+## PoC概要
 
-- DB：Oracle / PostgreSQL
-- 環境：Docker / AWS RDS（想定）
-- ツール：AWS Schema Conversion Tool（SCT）、Ora2Pg
-- 言語：SQL / Python
+本リポジトリでは、Oracle → PostgreSQL 移行を段階的に検証しています。
 
----
-
-## ■ システム構成
-
-### As-Is（移行前）
-- Oracle XE（Docker）
-- ローカル環境
-
-### To-Be（移行後）
-- PostgreSQL（RDS想定 or Docker）
-- AWS（VPC / Security Group）
-
-※ 構成図は docs 配下または下記 Notion を参照
+| Version | 主な検証内容 |
+|----------|--------------|
+| **Ver.1.0** | Oracle → PostgreSQL スキーマ移植、データ移行、AWS RDS構築、SQLチューニング |
+| **Ver.2.0** | PL/SQL → PL/pgSQL移植、SQL・Procedure性能比較、実行計画比較、事前集約テーブルの性能検証 |
 
 ---
 
-## ■ 移行方式
+## Ver.2.0 の主な追加内容
 
-- スキーマ：AWS Schema Conversion Tool（SCT）でDDL生成
-- データ　：Ora2Pg により COPY 文を生成し移行
+Ver.1.0 の内容に加え、以下の検証を追加しました。
 
-※ スキーマ変換とデータ移行を分離することで、変換精度と移行効率を両立
-
----
-
-## ■ パフォーマンス改善（抜粋）
-
-### ケース①：集約クエリの高速化
-
-#### ■ 課題
-- Bitmap Heap Scan によるI/Oコスト増大
-
-#### ■ 対応
-- カバリングインデックス作成（INCLUDE句）
-- Index Only Scan化
-- DATE_TRUNC による型維持
-
-```sql
-CREATE INDEX idx_jd_cover_1
-ON act1.t_journal_detail (account_id, journal_id)
-INCLUDE (debit_amount, credit_amount);
-```
----
-
-#### ■ 結果
-
-0.225秒 → 0.069秒（70%改善）
+- PL/SQL → PL/pgSQL の移植
+- ストアドプロシージャ性能比較
+- SQL性能比較
+- Oracle / PostgreSQL 実行計画比較
+- Oracle固有機能の移植方法整理
+- 事前集約テーブルによる性能改善効果の検証
 
 ---
 
-### ■ ケース②：JOIN前のデータ削減
+## 背景
 
-#### ■ 課題
-JOIN前のデータ量が多く非効率
+本PoCは以下を目的として実施しました。
 
-#### ■ 対応
-- 高選択度条件（JOURNAL_ID）を先に適用
-- インデックス利用効率を向上
-
-#### ■ 結果
-0.082秒 → 0.068秒（17%改善）
+- Oracle Database から PostgreSQL への移行検証
+- OSSデータベースへの移行技術習得
+- PostgreSQL の性能特性理解
+- Oracle と PostgreSQL の実装差異の理解
+- クラウド環境（AWS RDS）への適用性確認
 
 ---
 
-### ■ ケース③：スカラサブクエリの最適化
+## 実施内容
 
-#### ■ 課題
-行単位でサブクエリが実行される（N回実行）
+### Oracle → PostgreSQL 移植
 
-#### ■ 対応
-- インデックス追加
-- 並列実行設定（max_parallel_workers_per_gather）
-
-#### ■ 結果
-0.674秒 → 0.556秒（17%改善）
-
-#### ■ 改善余地
-JOIN + GROUP BY による一括集計で更なる高速化が可能
+- テーブル移植
+- インデックス移植
+- SQL移植
+- ストアドプロシージャ移植
+- データ移行
 
 ---
 
-## ■ 重要な知見
+### 性能比較
 
-- PostgreSQLはヒント句が存在しないため、インデックス設計とSQL構造が重要
-- Index Only ScanはVisibility Mapの状態に依存
-- VACUUM / ANALYZE により有効化される
-- 統計情報により実行計画が大きく変化する
-- JOIN順はコストベース最適化により決定される
+以下について比較・評価を実施しました。
+
+- Oracle vs PostgreSQL
+- SQL性能比較
+- Procedure性能比較
+- 実行計画比較
+- 結合クエリと集約済みデータの比較
 
 ---
 
-## ■ ディレクトリ構成
+### 検証環境
+
+|項目|内容|
+|---|---|
+|Host OS|Windows 11|
+|Linux|WSL2 (AlmaLinux 9.7)|
+|Container|Docker|
+|Oracle|Oracle Database 21c XE|
+|PostgreSQL|PostgreSQL 16|
+
+※ Ver.1.0では PostgreSQL を AWS RDS 上でも構築し、接続および動作検証を実施しました。
+
+---
+
+## 主な成果
+
+### Oracle → PostgreSQL 移植
+
+- ✅ 全テーブル移植
+- ✅ 全ストアドプロシージャ移植
+- ✅ SQL移植
+- ✅ Oracleとの処理結果一致
+
+---
+
+### SQL性能比較
+
+18種類のSQLについて比較を実施しました。
+
+#### 比較内容
+
+- Oracle vs PostgreSQL
+- 結合クエリ
+- 集約済みデータ
+
+#### 結果
+
+- PostgreSQLは大量データ検索で高い性能を確認
+- Oracleは一部集約処理で優位な結果を確認
+- ワークロード特性によって性能傾向が変化することを確認
+
+---
+
+### Procedure性能比較
+
+5本のProcedureについて比較しました。
+
+- proc_set_inquirydata
+- proc_set_journal
+- proc_set_settl_m
+- proc_set_settl_y
+- proc_set_inqCall
+
+Procedureごとに異なる性能傾向が見られ、
+実行計画の違いが性能へ大きく影響することを確認しました。
+
+---
+
+#### 実行計画比較
+
+Oracle
+
+- INDEX RANGE SCAN
+- TABLE ACCESS BY INDEX ROWID
+- HASH JOIN
+
+PostgreSQL
+
+- Bitmap Index Scan
+- Bitmap Heap Scan
+- Hash Join
+- Incremental Sort
+- Memoize
+
+Oracle と PostgreSQL では、
+同一SQLであっても異なる実行計画が選択されることを確認しました。
+
+---
+
+#### 事前集約テーブルの検証
+
+照会用に月別・年度別精算表を事前作成し、
+結合クエリとの性能比較を実施しました。
+
+結果
+
+- SQL実行時間を最大約98%削減
+- JOIN回数削減による実行計画の単純化
+- 集約系照会で大きな効果を確認
+
+---
+
+## 技術スタック
+
+### Database
+
+- Oracle Database 21c XE
+- PostgreSQL 16
+
+### Language
+
+- SQL
+- PL/SQL
+- PL/pgSQL
+
+### Infrastructure
+
+- Windows 11
+- WSL2
+- Docker
+- AWS RDS（Ver.1.0）
+
+### Tools
+
+- Docker Compose
+- Git
+- GitHub
+
+---
+
+## ディレクトリ構成
+
+```text
 .
-├── oracle/        # Oracle DDL・データ生成スクリプト
-├── postgres/      # PostgreSQL DDL・COPY文
-├── sql/           # 実行SQL
-├── explain/       # 実行計画（Before / After）
-├── docs/          # 詳細資料
-└── docker/        # 環境構築（任意）
-
-
----
-
-## ■ 再現手順（簡易）
-
-1. Oracle環境をDockerで起動  
-2. Pythonスクリプトでデータ生成  
-3. Ora2PgでCOPY文生成  
-4. PostgreSQLにデータロード  
-5. SQL実行・性能比較  
-
----
-
-## ■ トラブルシュート
-
-### ■ COPY時の `\N` エラー
-- 原因：スキーマ指定不足  
-- 対応：テーブル名にスキーマを明示  
-
-### ■ RDS接続エラー
-- 原因：Security Group設定  
-- 対応：ポート開放  
-
-### ■ タイムアウト
-- 原因：VPC / ネットワーク設定  
-- 対応：ネットワーク設定見直し  
+├── 01_docs
+│   ├── 1.0
+│   └── 2.0
+│       ├── 01_Oracle
+│       ├── 02_PostgreSQL
+│       └── 03_Comparison
+├── oracle
+│   ├── ddl
+│   ├── data
+│   └── procedure
+│
+├── postgresql
+│   ├── ddl
+│   ├── data
+│   └── procedure
+│
+├── sql
+│
+│
+└── docker
+```
 
 ---
 
-## ■ 今後の課題
+## ドキュメント
 
-- パーティショニング導入  
-- マテリアライズドビュー活用  
-- 照会用データの事前集計  
-- JOINベースへのクエリ書き換えによる最適化  
+### Ver.1.0
+
+- アーキテクチャ構成
+- データベース移行手順
+- パフォーマンスチューニング
+- トラブルシューティング
+
+### Ver.2.0
+
+#### Oracle
+
+- 処理概要
+- テーブル設計
+- Procedure詳細
+- Procedureフロー
+- 実行例
+
+#### PostgreSQL
+
+- 処理概要
+- テーブル設計
+- Procedure詳細
+- Procedureフロー
+- 実行例
+- プロシージャ移植差異
+
+#### 比較資料
+
+- PoCまとめ
+- Oracle → PostgreSQL 移植差異
+- SQL性能比較
+- 実行計画比較
 
 ---
 
-## ■ 詳細ドキュメント（Notion）
+## 主な知見
 
-より詳細な検証内容・構成図はこちら  
-https://lying-floor-e0b.notion.site/Oracle-PostgreSQL-PoC-22a8fd51d71d80e89186ee67e1d2a02b
+本PoCを通して以下の知見を得ることができました。
+
+- Oracle と PostgreSQL では実行計画の選択方針が異なる
+- PostgreSQLでは統計情報やインデックス設計が性能へ大きく影響する
+- Oracle固有パッケージ（DBMS_*）は代替実装が必要
+- 事前集約テーブルは照会性能改善に非常に有効
+- SQLだけではなく、データ設計も性能へ大きく影響する
+
+---
+
+## 今後の課題
+
+- PostgreSQL / プロシージャ内クエリの実行計画チューニング
+- インデックス設計の最適化
+- 大規模データでの性能評価
+- AWS RDS環境での追加検証
+- PostgreSQL固有機能を利用した更なる性能改善
+
+---
+
+## ライセンス
+
+本リポジトリは学習および技術検証を目的として作成しています。
