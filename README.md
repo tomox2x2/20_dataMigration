@@ -9,11 +9,65 @@ Oracle と PostgreSQL の実装差異や性能特性について検証を行い�
 
 ---
 
+## Repository Map
+
+初めて読む方はこちらをご覧ください。
+
+1.README.md
+2.PoC 概要
+ (Ver.1.0)
+  - 01_docs/1.0/architecture.md
+  - 01_docs/1.0/migration.md
+  - 01_docs/1.0/performance.md
+ (Ver.2.0)
+  - 01_docs/2.0/overview.md
+3.Oracle→PostgreSQL差異
+ (Ver.1.0)
+  - 01_docs/1.0/performance.md(☆)
+ (Ver.2.0)
+  - 01_docs/2.0/03_comprison/summary.md
+4.SQL性能比較
+ (Ver.1.0)
+  - 01_docs/1.0/performance.md(☆)
+ (Ver.2.0)
+  - 01_docs/2.0/03_comprison/sql-performance.md
+5.実行計画比較
+ (Ver.1.0)
+  - 01_docs/1.0/performance.md(☆)
+ (Ver.2.0)
+  - 01_docs/2.0/03_comprison/execution-plan.md
+
+---
+
+## Executive Summary
+
+本PoCでは、Oracle DatabaseからPostgreSQLへの移行を想定し、
+
+・スキーマ移植
+・PL/SQL移植
+・SQL性能比較
+・実行計画比較
+・AWS RDS検証
+
+までを一貫して実施しました。
+その結果、
+
+・OracleとPostgreSQLでは実行計画の選択が異なること
+・SQLだけではなくデータ設計が性能へ大きく影響すること
+・事前集約テーブルが照会性能改善に非常に有効であること
+
+などを確認しました。
+
+---
+
 ## Highlights
 
-- Oracle → PostgreSQL 移植（テーブル・SQL・PL/SQL）
-- 約100万件のデータを用いた性能・実行計画比較
-- AWS RDS構築、事前集約テーブルの有効性検証まで実施
+- Oracle→PostgreSQL移行PoCをGitHub公開
+- 約100万件データによる性能比較
+- SQL18種類・Procedure5本比較
+- Oracle/PostgreSQL実行計画比較
+- 最大98%高速化を確認
+- AWS RDS上でも動作検証
 
 ---
 
@@ -21,10 +75,10 @@ Oracle と PostgreSQL の実装差異や性能特性について検証を行い�
 
 本リポジトリでは、Oracle → PostgreSQL 移行を段階的に検証しています。
 
-| Version | 主な検証内容 |
-|----------|--------------|
-| **Ver.1.0** | Oracle → PostgreSQL スキーマ移植、データ移行、AWS RDS構築、SQLチューニング |
-| **Ver.2.0** | PL/SQL → PL/pgSQL移植、SQL・Procedure性能比較、実行計画比較、事前集約テーブルの性能検証 |
+| Version | 目的 | 主な検証内容 |
+|----------|-----|---------------|
+| **Ver.1.0**  | 移行手順、Oracle vs PostgreSQL間のSQLクエリ関連差異確認  | Oracle → PostgreSQL スキーマ移植、データ移行、AWS RDS構築、SQLチューニング |
+| **Ver.2.0** | プロシージャ移行、Ver.1.0 大量データ取得の改善  | PL/SQL → PL/pgSQL移植、SQL・Procedure性能比較、実行計画比較、事前集約テーブルの性能検証 |
 
 ---
 
@@ -57,10 +111,8 @@ Ver.1.0 の内容に加え、以下の検証を追加しました。
 
 ### Oracle → PostgreSQL 移植
 
-- テーブル移植
-- インデックス移植
-- SQL移植
-- ストアドプロシージャ移植
+- DDL移植（テーブル・インデックス・ストアドプロシージャ）
+- DML移植
 - データ移行
 
 ---
@@ -73,7 +125,7 @@ Ver.1.0 の内容に加え、以下の検証を追加しました。
 - SQL性能比較
 - Procedure性能比較
 - 実行計画比較
-- 結合クエリと集約済みデータの比較
+- 事前集約による効果（結合クエリと集約済みデータの比較）
 
 ---
 
@@ -124,11 +176,13 @@ Ver.1.0 の内容に加え、以下の検証を追加しました。
 
 5本のProcedureについて比較しました。
 
-- proc_set_inquirydata
-- proc_set_journal
-- proc_set_settl_m
-- proc_set_settl_y
-- proc_set_inqCall
+- proc_set_inquirydata : 改善率   4.5 ( 12s / 263s)
+- proc_set_journal     : 改善率   3.4 (  9s / 261s)
+- proc_set_settl_m     : 改善率 400   (  4s / 1s)
+- proc_set_settl_y     : 改善率 100   (  0s / 0s)
+
+※：改善率 = PostgreSQL 実行平均時間 ÷  Oracle 実行平均時間
+   子プロシージャの実行時間を含む
 
 Procedureごとに異なる性能傾向が見られ、
 実行計画の違いが性能へ大きく影響することを確認しました。
@@ -194,6 +248,9 @@ Oracle と PostgreSQL では、
 - Docker Compose
 - Git
 - GitHub
+- DBeaver
+- pgAdmin
+- EXPLAIN / ANALYZE
 
 ---
 
