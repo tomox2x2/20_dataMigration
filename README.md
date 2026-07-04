@@ -14,26 +14,40 @@ Oracle と PostgreSQL の実装差異や性能特性について検証を行い�
 初めて読む方はこちらをご覧ください。
 
 1.README.md
+
 2.PoC 概要
+
  (Ver.1.0)
+
   - 01_docs/1.0/architecture.md
   - 01_docs/1.0/migration.md
   - 01_docs/1.0/performance.md
+
  (Ver.2.0)
+
   - 01_docs/2.0/overview.md
+
 3.Oracle→PostgreSQL差異
+
  (Ver.1.0)
   - 01_docs/1.0/performance.md(☆)
+
  (Ver.2.0)
   - 01_docs/2.0/03_comprison/summary.md
+
 4.SQL性能比較
+
  (Ver.1.0)
   - 01_docs/1.0/performance.md(☆)
+
  (Ver.2.0)
   - 01_docs/2.0/03_comprison/sql-performance.md
+
 5.実行計画比較
+
  (Ver.1.0)
   - 01_docs/1.0/performance.md(☆)
+
  (Ver.2.0)
   - 01_docs/2.0/03_comprison/execution-plan.md
 
@@ -44,9 +58,13 @@ Oracle と PostgreSQL の実装差異や性能特性について検証を行い�
 本PoCでは、Oracle DatabaseからPostgreSQLへの移行を想定し、
 
 ・スキーマ移植
+
 ・PL/SQL移植
+
 ・SQL性能比較
+
 ・実行計画比較
+
 ・AWS RDS検証
 
 までを一貫して実施しました。
