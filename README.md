@@ -51,6 +51,8 @@ Oracle と PostgreSQL の実装差異や性能特性について検証を行い�
  (Ver.2.0)
   - 01_docs/2.0/03_comprison/execution-plan.md
 
+☆：再掲したもの
+
 ---
 
 ## Executive Summary
